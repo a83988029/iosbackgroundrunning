@@ -8,6 +8,8 @@
 
 #import "AppDelegate.h"
 #import <CoreLocation/CoreLocation.h>
+#import <AVFoundation/AVFoundation.h>
+//#import <AudioToolbox/AudioToolbox.h>
 
 @interface AppDelegate ()<CLLocationManagerDelegate>
 @end
@@ -19,30 +21,7 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
-    
-    locationMannager = [[CLLocationManager alloc] init];
-    locationMannager.delegate = self;
-    locationMannager.activityType = CLActivityTypeFitness;
-    locationMannager.distanceFilter = kCLLocationAccuracyThreeKilometers;
-    locationMannager.desiredAccuracy = kCLLocationAccuracyThreeKilometers;
-    locationMannager.allowsBackgroundLocationUpdates = YES; //允许后台刷新
-    locationMannager.pausesLocationUpdatesAutomatically = NO;//允许自动暂停定位服务
-    [locationMannager requestAlwaysAuthorization];
-        
-    
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        
-        [locationMannager startUpdatingLocation];
-        [NSThread sleepForTimeInterval:5];
-        [locationMannager stopUpdatingLocation];
 
-        if ([CLLocationManager authorizationStatus] == kCLAuthorizationStatusAuthorizedAlways) {
-            //第一次打开时系统还没允许使用定位，直接关闭会导致后台驻留失败，所以定位还未打开时不主动关闭，并不会增加太多耗电量。
-            [locationMannager stopUpdatingLocation];
-
-        }
-        
-    });
     
     return YES;
 }
@@ -81,8 +60,8 @@
             i = 0;
             dispatch_async(dispatch_get_main_queue(), ^{
                 NSLog(@"时间:%.2f",application.backgroundTimeRemaining);
+                [locationMannager startUpdatingLocation];
             });
-            [locationMannager startUpdatingLocation];
             while (i < 10 && inBackground) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     NSLog(@"时间:%d 总时间:%d,剩余时间%.2f",i,j,application.backgroundTimeRemaining<180?application.backgroundTimeRemaining:180.0);
